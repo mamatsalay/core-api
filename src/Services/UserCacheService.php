@@ -187,13 +187,17 @@ class UserCacheService
 
     /**
      * Generate ETag for a user.
+     *
+     * The locale is stored as a setting rather than on the user, so it is passed in: without it a
+     * browser revalidating with the old ETag would get a 304 and keep the previous locale.
      */
-    public static function generateETag(User $user): string
+    public static function generateETag(User $user, ?string $locale = null): string
     {
         $userMeta    = json_encode($user->meta);
         $userOptions = json_encode($user->options);
+        $etag        = 'user-' . $user->uuid . '-' . $user->updated_at->timestamp . '-' . strlen($userMeta) . '-' . strlen($userOptions);
 
-        return '"user-' . $user->uuid . '-' . $user->updated_at->timestamp . '-' . strlen($userMeta) . '-' . strlen($userOptions) . '"';
+        return '"' . ($locale ? $etag . '-' . $locale : $etag) . '"';
     }
 
     /**
