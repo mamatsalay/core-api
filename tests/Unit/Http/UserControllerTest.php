@@ -1502,6 +1502,22 @@ test('user controller current endpoint stores and reuses cached user response pa
         ->and($cachedPayload)->toBe($freshPayload);
 });
 
+test('user controller current endpoint returns a newly saved locale instead of the cached one', function () {
+    user_controller_database();
+    $user = user_controller_user('owner-1');
+
+    user_controller()->setUserLocale(user_controller_request('POST', ['locale' => 'uz-uz'], $user));
+    $before = user_controller()->current(user_controller_request('GET', [], $user, 'current'));
+
+    user_controller()->setUserLocale(user_controller_request('POST', ['locale' => 'ru-ru'], $user));
+    $after = user_controller()->current(user_controller_request('GET', [], $user, 'current'));
+
+    expect($before->getData(true)['user']['locale'])->toBe('uz-uz')
+        ->and($after->headers->get('X-Cache-Hit'))->toBe('false')
+        ->and($after->getData(true)['user']['locale'])->toBe('ru-ru')
+        ->and($after->getEtag())->not->toBe($before->getEtag());
+});
+
 test('user controller current endpoint bypasses server cache when user cache is disabled', function () {
     user_controller_database();
     config(['fleetbase.user_cache.enabled' => false]);

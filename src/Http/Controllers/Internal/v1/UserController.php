@@ -643,7 +643,7 @@ class UserController extends FleetbaseController
         }
 
         // Generate ETag for cache validation
-        $etag = UserCacheService::generateETag($user);
+        $etag = UserCacheService::generateETag($user, $user->getLocale());
 
         // Try to get from server cache
         $companyId  = session('company');
@@ -1458,6 +1458,10 @@ class UserController extends FleetbaseController
 
         // Persist to database
         Setting::configure($localeSettingKey, $locale);
+
+        // The cached current-user payload carries the locale, and a setting doesn't touch the user,
+        // so without this the old locale comes back on reload until the cache expires
+        UserCacheService::invalidateUser($user);
 
         return response()->json(['status' => 'ok']);
     }

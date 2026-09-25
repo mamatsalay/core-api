@@ -194,6 +194,7 @@ test('user cache service builds keys etags and ttl configuration from user state
 
     expect(UserCacheService::getCacheKey($user, 'company-1'))->toBe('user:current:user-1:company-1:1784282400')
         ->and(UserCacheService::generateETag($user))->toBe('"user-user-1-1784282400-16-14"')
+        ->and(UserCacheService::generateETag($user, 'ru-ru'))->toBe('"user-user-1-1784282400-16-14-ru-ru"')
         ->and(UserCacheService::getBrowserCacheTTL())->toBe(123)
         ->and(UserCacheService::getServerCacheTTL())->toBe(456)
         ->and(UserCacheService::isEnabled())->toBeFalse();
